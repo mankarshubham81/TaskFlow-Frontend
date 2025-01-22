@@ -30,6 +30,18 @@ export const authApi = createApi({
         }
       }
     }),
+    resendOtp: builder.mutation({
+      query: (user) => {
+        return {
+          url: `resend-otp`,
+          method: 'POST',
+          body: user,
+          headers: {
+            'Content-type': 'application/json'
+          }
+        }
+      }
+    }),
     loginUser: builder.mutation({
       query: (user) => {
         return {
@@ -101,4 +113,4 @@ export const authApi = createApi({
   }),
 })
 
-export const { useCreateUserMutation, useVerifyEmailMutation, useLoginUserMutation, useGetUserQuery, useLogoutUserMutation, useResetPasswordLinkMutation, useResetPasswordMutation, useChangePasswordMutation } = authApi
+export const { useCreateUserMutation, useVerifyEmailMutation, useLoginUserMutation, useGetUserQuery, useLogoutUserMutation, useResetPasswordLinkMutation, useResetPasswordMutation, useChangePasswordMutation, useResendOtpMutation } = authApi
