@@ -28,7 +28,7 @@ const Login = () => {
           setServerErrorMessage('')
           action.resetForm()
           setLoading(false);
-          router.push('/user/profile')
+          router.push('/user/task')
         }
         if (response.error && response.error.data.status === "failed") {
           setServerErrorMessage(response.error.data.message)
