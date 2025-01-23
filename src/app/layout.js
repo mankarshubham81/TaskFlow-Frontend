@@ -1,4 +1,5 @@
 import "./globals.css";
+import { ThemeProvider } from '@/context/ThemeContext';
 import StoreProvider from "./StoreProvider";
 export const metadata = {
   title: "Taskflow",
@@ -9,10 +10,25 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="bg-gray-100">
-        <StoreProvider>
-          {children}
-        </StoreProvider>
+        <ThemeProvider>
+          <StoreProvider>
+            {children}
+          </StoreProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
 }
+
+
+// export default function RootLayout({ children }) {
+//   return (
+//     <html lang="en">
+//       <body>
+//         <ThemeProvider>
+//           {children}
+//         </ThemeProvider>
+//       </body>
+//     </html>
+//   )
+// }

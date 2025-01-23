@@ -1,13 +1,14 @@
 "use client";
-
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useTheme } from '@/context/ThemeContext';
 import { AppBar, Toolbar, IconButton, Menu, MenuItem, Typography, Box, Button } from "@mui/material";
-import { Menu as MenuIcon } from "@mui/icons-material";
+import { Menu as MenuIcon, Brightness4, Brightness7 } from "@mui/icons-material";
 import LoadingIndicator from "./LoadingIndicator";
 import Cookies from "js-cookie";
 
 const Navbar = () => {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [isAuth, setIsAuth] = useState(null);
   const [menuAnchor, setMenuAnchor] = useState(null);
 
@@ -27,58 +28,56 @@ const Navbar = () => {
   return (
     <>
       {isAuth === null && <LoadingIndicator />}
-      <AppBar position="static" color="primary">
+      <AppBar 
+        position="static" 
+        color="inherit"
+        sx={{ 
+          bgcolor: isDarkMode ? 'background.paper' : 'primary.main',
+          boxShadow: 'none',
+          borderBottom: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`
+        }}
+      >
         <Toolbar>
-          {/* Logo */}
           <Typography
             variant="h6"
-            component="div"
-            sx={{ flexGrow: 1, fontWeight: "bold", cursor: "pointer" }}
+            component={Link}
+            href="/"
+            sx={{ 
+              flexGrow: 1, 
+              fontWeight: "bold",
+              textDecoration: 'none',
+              color: isDarkMode ? 'text.primary' : 'common.white'
+            }}
           >
-            Taskflow
+            TaskFlow
           </Typography>
 
-          {/* Desktop Navigation Links */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
-            <Button component={Link} href="/" color="inherit" sx={{ textTransform: "none", fontWeight: "bold" }}>
+          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2, alignItems: 'center' }}>
+            <IconButton onClick={toggleTheme} color="inherit">
+              {isDarkMode ? <Brightness7 /> : <Brightness4 />}
+            </IconButton>
+            <Button component={Link} href="/" color="inherit">
               Home
             </Button>
             {isAuth ? (
-              <Button
-                component={Link}
-                href="/user/task"
-                color="inherit"
-                sx={{ textTransform: "none", fontWeight: "bold" }}
-              >
-                Task
+              <Button component={Link} href="/user/task" color="inherit">
+                Tasks
               </Button>
             ) : (
               <>
-                <Button
-                  component={Link}
-                  href="/account/login"
-                  color="inherit"
-                  sx={{ textTransform: "none", fontWeight: "bold" }}
-                >
+                <Button component={Link} href="/account/login" color="inherit">
                   Login
                 </Button>
-                <Button
-                  component={Link}
-                  href="/account/register"
-                  color="inherit"
-                  sx={{ textTransform: "none", fontWeight: "bold" }}
-                >
-                  Registration
+                <Button component={Link} href="/account/register" color="inherit">
+                  Register
                 </Button>
               </>
             )}
           </Box>
 
-          {/* Mobile Menu Icon */}
           <IconButton
             edge="start"
             color="inherit"
-            aria-label="menu"
             sx={{ display: { xs: "flex", md: "none" } }}
             onClick={handleMenuOpen}
           >
@@ -87,36 +86,30 @@ const Navbar = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Mobile Dropdown Menu */}
       <Menu
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={handleMenuClose}
-        keepMounted
-        sx={{ display: { xs: "block", md: "none" } }}
+        sx={{ 
+          '& .MuiPaper-root': {
+            bgcolor: isDarkMode ? 'background.paper' : 'background.default',
+            minWidth: 200
+          }
+        }}
       >
+        <MenuItem onClick={toggleTheme}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {isDarkMode ? <Brightness7 /> : <Brightness4 />}
+            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+          </Box>
+        </MenuItem>
         <MenuItem component={Link} href="/" onClick={handleMenuClose}>
           Home
         </MenuItem>
-        {
-          isAuth &&
+        {isAuth && (
           <MenuItem component={Link} href="/user/task" onClick={handleMenuClose}>
-            task
+            Tasks
           </MenuItem>
-        }
-        {isAuth ? (
-          <MenuItem component={Link} href="/user/profile" onClick={handleMenuClose}>
-            Profile
-          </MenuItem>
-        ) : (
-          <>
-            <MenuItem component={Link} href="/account/login" onClick={handleMenuClose}>
-              Login
-            </MenuItem>
-            <MenuItem component={Link} href="/account/register" onClick={handleMenuClose}>
-              Registration
-            </MenuItem>
-          </>
         )}
       </Menu>
     </>

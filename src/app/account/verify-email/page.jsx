@@ -1,4 +1,3 @@
-// src/app/account/verify-email/page.jsx
 "use client";
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
@@ -14,33 +13,24 @@ const VerifyEmailPage = () => {
   const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
   const [message, setMessage] = useState({ type: "", content: "" });
 
-  // Handle cooldown timer
   useEffect(() => {
-    let interval;
-    if (cooldown > 0) {
-      interval = setInterval(() => {
-        setCooldown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
+    const interval = cooldown > 0 ? setInterval(() => setCooldown(prev => prev - 1), 1000) : null;
+    return () => interval && clearInterval(interval);
   }, [cooldown]);
 
   const formik = useFormik({
     initialValues: { email: "", otp: "" },
     validationSchema: verifyEmailSchema,
-    onSubmit: async (values) => {
+    onSubmit: async values => {
       try {
-        const response = await verifyEmail(values);
-        
-        if (response.data?.status === "success") {
-          setMessage({ type: "success", content: response.data.message });
-          setTimeout(() => router.push("/account/login"), 2000);
-        } else {
-          const errorMessage = response.error?.data?.message || "Verification failed";
-          setMessage({ type: "error", content: errorMessage });
-        }
+        const { data } = await verifyEmail(values).unwrap();
+        setMessage({ type: "success", content: data.message });
+        setTimeout(() => router.push("/account/login"), 2000);
       } catch (error) {
-        setMessage({ type: "error", content: "An unexpected error occurred" });
+        setMessage({
+          type: "error",
+          content: error.data?.message || "Verification failed"
+        });
       }
     },
   });
@@ -52,98 +42,97 @@ const VerifyEmailPage = () => {
     }
 
     try {
-      const response = await resendOtp({ email: formik.values.email });
-      
-      if (response.data?.status === "success") {
-        setCooldown(30); // 30-second cooldown
-        setMessage({ type: "success", content: response.data.message });
-      } else {
-        const errorMessage = response.error?.data?.message || "Failed to resend OTP";
-        setMessage({ type: "error", content: errorMessage });
-      }
+      await resendOtp({ email: formik.values.email }).unwrap();
+      setCooldown(30);
+      setMessage({ type: "success", content: "New OTP sent successfully" });
     } catch (error) {
-      setMessage({ type: "error", content: "Failed to resend OTP" });
+      setMessage({
+        type: "error", 
+        content: error.data?.message || "Failed to resend OTP"
+      });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">Verify Your Email</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Please enter the OTP sent to your email address
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="w-full max-w-md mx-4 p-8 bg-white rounded-2xl shadow-xl">
+        <div className="text-center space-y-2 mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Verify Email</h2>
+          <p className="text-gray-600">Enter the OTP sent to your email</p>
         </div>
 
-        <form onSubmit={formik.handleSubmit} className="mt-8 space-y-6">
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.email}
-                className={`mt-1 block w-full px-3 py-2 border rounded-md ${
-                  formik.touched.email && formik.errors.email
-                    ? "border-red-500"
-                    : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              />
-              {formik.touched.email && formik.errors.email && (
-                <p className="mt-1 text-sm text-red-600">{formik.errors.email}</p>
-              )}
-            </div>
+        {message.content && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            message.type === "success" 
+              ? "bg-green-100 text-green-800" 
+              : "bg-red-100 text-red-800"
+          }`}>
+            {message.content}
+          </div>
+        )}
 
-            <div>
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
-                Verification Code
-              </label>
-              <input
-                id="otp"
-                name="otp"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength="6"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.otp}
-                className={`mt-1 block w-full px-3 py-2 border rounded-md ${
-                  formik.touched.otp && formik.errors.otp
-                    ? "border-red-500"
-                    : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              />
-              {formik.touched.otp && formik.errors.otp && (
-                <p className="mt-1 text-sm text-red-600">{formik.errors.otp}</p>
-              )}
-            </div>
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <input
+              name="email"
+              type="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`w-full px-4 py-3 border ${
+                formik.touched.email && formik.errors.email 
+                  ? "border-red-500" 
+                  : "border-gray-300"
+              } rounded-lg focus:ring-2 ${
+                formik.touched.email && formik.errors.email 
+                  ? "focus:ring-red-500" 
+                  : "focus:ring-blue-500"
+              } transition-all`}
+            />
+            {formik.touched.email && formik.errors.email && (
+              <p className="mt-2 text-sm text-red-600">{formik.errors.email}</p>
+            )}
           </div>
 
-          {message.content && (
-            <div
-              className={`p-3 rounded-md ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {message.content}
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Verification Code
+            </label>
+            <input
+              name="otp"
+              type="text"
+              inputMode="numeric"
+              maxLength="6"
+              value={formik.values.otp}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`w-full px-4 py-3 border ${
+                formik.touched.otp && formik.errors.otp 
+                  ? "border-red-500" 
+                  : "border-gray-300"
+              } rounded-lg focus:ring-2 ${
+                formik.touched.otp && formik.errors.otp 
+                  ? "focus:ring-red-500" 
+                  : "focus:ring-blue-500"
+              } transition-all`}
+            />
+            {formik.touched.otp && formik.errors.otp && (
+              <p className="mt-2 text-sm text-red-600">{formik.errors.otp}</p>
+            )}
+          </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="space-y-4">
             <button
               type="submit"
               disabled={isVerifying}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+              className={`w-full py-3 px-6 text-white font-medium rounded-lg transition-all ${
+                isVerifying 
+                  ? "bg-blue-400 cursor-not-allowed" 
+                  : "bg-blue-600 hover:bg-blue-700"
+              } focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
             >
               {isVerifying ? "Verifying..." : "Verify Email"}
             </button>
@@ -151,22 +140,19 @@ const VerifyEmailPage = () => {
             <button
               type="button"
               onClick={handleResendOTP}
-              disabled={cooldown > 0 || isResending || isVerifying}
-              className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
+              disabled={cooldown > 0 || isResending}
+              className={`w-full py-3 px-6 text-white font-medium rounded-lg transition-all ${
+                cooldown > 0 || isResending 
+                  ? "bg-gray-400 cursor-not-allowed" 
+                  : "bg-gray-600 hover:bg-gray-700"
+              } focus:ring-2 focus:ring-gray-500 focus:ring-offset-2`}
             >
-              {isResending
-                ? "Sending..."
-                : cooldown > 0
-                ? `Resend OTP (${cooldown}s)`
-                : "Resend OTP"}
+              {isResending ? "Sending..." : cooldown > 0 ? `Resend OTP (${cooldown}s)` : "Resend OTP"}
             </button>
           </div>
 
           <div className="text-center text-sm">
-            <Link
-              href="/account/login"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
+            <Link href="/account/login" className="text-blue-600 hover:text-blue-700">
               Back to Login
             </Link>
           </div>

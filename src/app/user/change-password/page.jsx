@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useFormik } from 'formik';
 import { changePasswordSchema } from '@/validation/schemas';
 import { useChangePasswordMutation } from '@/lib/services/auth';
@@ -7,44 +7,55 @@ import { useState } from 'react';
 const initialValues = {
   password: "",
   password_confirmation: ""
-}
+};
+
 const ChangePassword = () => {
-  const [serverErrorMessage, setServerErrorMessage] = useState('')
-  const [serverSuccessMessage, setServerSuccessMessage] = useState('')
+  const [serverMessage, setServerMessage] = useState({ type: '', content: '' });
   const [loading, setLoading] = useState(false);
-  const [changePassword] = useChangePasswordMutation()
-  const { values, errors, handleChange, handleSubmit } = useFormik({
+  const [changePassword] = useChangePasswordMutation();
+  
+  const { values, errors, touched, handleChange, handleSubmit } = useFormik({
     initialValues,
     validationSchema: changePasswordSchema,
-    onSubmit: async (values, action) => {
+    onSubmit: async (values, { resetForm }) => {
       setLoading(true);
       try {
-        const response = await changePassword(values)
-        if (response.data && response.data.status === "success") {
-          setServerSuccessMessage(response.data.message)
-          setServerErrorMessage('')
-          action.resetForm()
-          setLoading(false);
-        }
-        if (response.error && response.error.data.status === "failed") {
-          setServerErrorMessage(response.error.data.message)
-          setServerSuccessMessage('')
-          setLoading(false);
+        const response = await changePassword(values);
+        if (response.data?.status === "success") {
+          setServerMessage({ type: 'success', content: response.data.message });
+          resetForm();
+        } else if (response.error) {
+          setServerMessage({ type: 'error', content: response.error.data.message });
         }
       } catch (error) {
-        // console.log(error);
+        setServerMessage({ type: 'error', content: 'An unexpected error occurred' });
+      } finally {
         setLoading(false);
       }
     }
-  })
+  });
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Change Password</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="newPassword" className="block font-medium mb-2">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="w-full max-w-md mx-4 p-8 bg-white rounded-2xl shadow-xl transition-all duration-300">
+        <div className="text-center space-y-2 mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Change Password</h2>
+          <p className="text-gray-600">Enter your new password below</p>
+        </div>
+
+        {serverMessage.content && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            serverMessage.type === 'success' 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {serverMessage.content}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               New Password
             </label>
             <input
@@ -53,15 +64,21 @@ const ChangePassword = () => {
               name="password"
               value={values.password}
               onChange={handleChange}
-              className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-              placeholder="Enter your new password"
+              className={`w-full px-4 py-3 border ${
+                touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:ring-2 ${
+                touched.password && errors.password ? 'focus:ring-red-500' : 'focus:ring-blue-500'
+              } focus:border-transparent transition-all`}
+              placeholder="••••••••"
             />
-            {errors.password && <div className="text-sm text-red-500 px-2">{errors.password}</div>}
-
+            {touched.password && errors.password && (
+              <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+            )}
           </div>
-          <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block font-medium mb-2">
-              Confirm New Password
+
+          <div>
+            <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+              Confirm Password
             </label>
             <input
               type="password"
@@ -69,24 +86,44 @@ const ChangePassword = () => {
               name="password_confirmation"
               value={values.password_confirmation}
               onChange={handleChange}
-              className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-              placeholder="Confirm your new password"
+              className={`w-full px-4 py-3 border ${
+                touched.password_confirmation && errors.password_confirmation 
+                  ? 'border-red-500' 
+                  : 'border-gray-300'
+              } rounded-lg focus:ring-2 ${
+                touched.password_confirmation && errors.password_confirmation 
+                  ? 'focus:ring-red-500' 
+                  : 'focus:ring-blue-500'
+              } focus:border-transparent transition-all`}
+              placeholder="••••••••"
             />
-            {errors.password_confirmation && <div className="text-sm text-red-500 px-2">{errors.password_confirmation}</div>}
-
+            {touched.password_confirmation && errors.password_confirmation && (
+              <p className="mt-2 text-sm text-red-600">{errors.password_confirmation}</p>
+            )}
           </div>
+
           <button
             type="submit"
-            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring focus:ring-indigo-200 focus:ring-opacity-50 disabled:bg-gray-400"
-            disabled={loading}>
-            Change Password
+            disabled={loading}
+            className={`w-full py-3 px-6 text-white font-medium rounded-lg transition-all ${
+              loading 
+                ? 'bg-blue-400 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            } focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Processing...</span>
+              </div>
+            ) : (
+              'Change Password'
+            )}
           </button>
         </form>
-        {serverSuccessMessage && <div className="text-sm text-green-500 font-semibold px-2 text-center">{serverSuccessMessage}</div>}
-        {serverErrorMessage && <div className="text-sm text-red-500 font-semibold px-2 text-center">{serverErrorMessage}</div>}
       </div>
     </div>
   );
-}
+};
 
-export default ChangePassword
+export default ChangePassword;

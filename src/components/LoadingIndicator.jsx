@@ -8,14 +8,6 @@ const LoadingIndicator = () => {
         {/* Inner Timer Animation */}
         <div className="absolute h-20 w-20 rounded-full bg-gradient-to-r from-purple-500 to-purple-700 animate-pulse"></div>
 
-        {/* Timer Icon */}
-        <div className="z-10 flex items-center justify-center bg-white rounded-full h-16 w-16 shadow-lg">
-          <img
-            src="https://www.svgrepo.com/show/406721/ninja-light-skin-tone.svg"
-            className="h-12 w-12"
-            alt="Loading"
-          />
-        </div>
 
         {/* Dynamic Loading Text */}
         <p className="mt-4 text-white font-semibold text-lg animate-bounce">

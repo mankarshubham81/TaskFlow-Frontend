@@ -7,12 +7,35 @@ module.exports = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-      },
-    },
+      colors: {
+        primary: {
+          DEFAULT: '#3B82F6',
+          dark: '#2563EB'
+        },
+        secondary: {
+          DEFAULT: '#6366F1',
+          dark: '#4F46E5'
+        }
+      }
+    }
   },
   plugins: [],
 };
+
+// module.exports = {
+//   darkMode: 'class',
+//   theme: {
+//     extend: {
+//       colors: {
+//         primary: {
+//           DEFAULT: '#3B82F6',
+//           dark: '#2563EB'
+//         },
+//         secondary: {
+//           DEFAULT: '#6366F1',
+//           dark: '#4F46E5'
+//         }
+//       }
+//     }
+//   }
+// }

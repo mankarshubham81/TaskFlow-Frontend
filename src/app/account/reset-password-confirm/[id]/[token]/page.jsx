@@ -1,97 +1,105 @@
-"use client"
+"use client";
 import { useFormik } from 'formik';
-import { useParams, useRouter } from 'next/navigation'
 import { resetPasswordSchema } from '@/validation/schemas';
 import { useResetPasswordMutation } from '@/lib/services/auth';
+import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-const initialValues = {
-  password: "",
-  password_confirmation: ""
-}
 const ResetPasswordConfirm = () => {
-  const [serverErrorMessage, setServerErrorMessage] = useState('')
-  const [serverSuccessMessage, setServerSuccessMessage] = useState('')
-  const [loading, setLoading] = useState(false);
-  const router = useRouter()
-  const { id, token } = useParams()
-  const [resetPassword] = useResetPasswordMutation()
-  const { values, errors, handleChange, handleSubmit } = useFormik({
-    initialValues,
+  const router = useRouter();
+  const { id, token } = useParams();
+  const [message, setMessage] = useState({ type: '', content: '' });
+  const [resetPassword] = useResetPasswordMutation();
+
+  const { values, errors, touched, handleChange, handleSubmit } = useFormik({
+    initialValues: { password: "", password_confirmation: "" },
     validationSchema: resetPasswordSchema,
-    onSubmit: async (values, action) => {
-      setLoading(true);
+    onSubmit: async values => {
       try {
-        const data = { ...values, id, token }
-        const response = await resetPassword(data)
-        if (response.data && response.data.status === "success") {
-          setServerSuccessMessage(response.data.message)
-          setServerErrorMessage('')
-          action.resetForm()
-          setLoading(false);
-          router.push('/account/login')
-        }
-        if (response.error && response.error.data.status === "failed") {
-          setServerErrorMessage(response.error.data.message)
-          setServerSuccessMessage('')
-          setLoading(false);
-        }
+        const { data } = await resetPassword({ ...values, id, token }).unwrap();
+        setMessage({ type: 'success', content: data.message });
+        setTimeout(() => router.push('/account/login'), 2000);
       } catch (error) {
-        // console.log(error);
-        setLoading(false);
+        setMessage({ type: 'error', content: error.data?.message || "Password reset failed" });
       }
     }
-  })
+  });
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Reset Password</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="newPassword" className="block font-medium mb-2">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="w-full max-w-md mx-4 p-8 bg-white rounded-2xl shadow-xl">
+        <div className="text-center space-y-2 mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Reset Password</h2>
+          <p className="text-gray-600">Enter your new password below</p>
+        </div>
+
+        {message.content && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            message.type === 'success' 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {message.content}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               New Password
             </label>
             <input
-              type="password"
-              id="password"
               name="password"
+              type="password"
               value={values.password}
               onChange={handleChange}
-              className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-              placeholder="Enter your new password"
+              className={`w-full px-4 py-3 border ${
+                touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:ring-2 ${
+                touched.password && errors.password ? 'focus:ring-red-500' : 'focus:ring-blue-500'
+              } transition-all`}
+              placeholder="••••••••"
             />
-            {errors.password && <div className="text-sm text-red-500 px-2">{errors.password}</div>}
+            {touched.password && errors.password && (
+              <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+            )}
           </div>
-          <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block font-medium mb-2">
-              Confirm New Password
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Confirm Password
             </label>
             <input
-              type="password"
-              id="password_confirmation"
               name="password_confirmation"
+              type="password"
               value={values.password_confirmation}
               onChange={handleChange}
-              className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-              placeholder="Confirm your new password"
+              className={`w-full px-4 py-3 border ${
+                touched.password_confirmation && errors.password_confirmation 
+                  ? 'border-red-500' 
+                  : 'border-gray-300'
+              } rounded-lg focus:ring-2 ${
+                touched.password_confirmation && errors.password_confirmation 
+                  ? 'focus:ring-red-500' 
+                  : 'focus:ring-blue-500'
+              } transition-all`}
+              placeholder="••••••••"
             />
-            {errors.password_confirmation && <div className="text-sm text-red-500 px-2">{errors.password_confirmation}</div>}
-
+            {touched.password_confirmation && errors.password_confirmation && (
+              <p className="mt-2 text-sm text-red-600">{errors.password_confirmation}</p>
+            )}
           </div>
+
           <button
             type="submit"
-            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring focus:ring-indigo-200 focus:ring-opacity-50 disabled:bg-gray-400"
-            disabled={loading}>
+            className="w-full py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+          >
             Reset Password
           </button>
-
         </form>
-        {serverSuccessMessage && <div className="text-sm text-green-500 font-semibold px-2 text-center">{serverSuccessMessage}</div>}
-        {serverErrorMessage && <div className="text-sm text-red-500 font-semibold px-2 text-center">{serverErrorMessage}</div>}
       </div>
     </div>
   );
-}
+};
 
-export default ResetPasswordConfirm
+export default ResetPasswordConfirm;
