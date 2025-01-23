@@ -11,6 +11,7 @@ import {
 import TaskForm from "@/components/TaskForm";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import AddTaskIcon from '@mui/icons-material/AddTask';
 
 const columns = {
   pending: {
@@ -38,6 +39,7 @@ export default function TaskPage() {
   const [deleteTask] = useDeleteTaskMutation();
   const [showDeleteModal, setShowDeleteModal] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showTaskForm, setShowTaskForm] = useState(false);
 
   useEffect(() => {
     if (response?.data) {
@@ -52,7 +54,6 @@ export default function TaskPage() {
     const { source, destination, draggableId } = result;
     const validColumns = Object.keys(columns);
 
-    // Validate destination column
     if (!destination || !validColumns.includes(destination.droppableId)) {
       setErrorMessage("Tasks can only be moved to Pending, Completed, or Done columns");
       return;
@@ -66,7 +67,6 @@ export default function TaskPage() {
     const taskId = draggableId;
     const newStatus = destination.droppableId;
 
-    // Optimistic update
     const originalTasks = localTasks;
     const updatedTasks = originalTasks.map(task => 
       task._id === taskId ? { ...task, status: newStatus } : task
@@ -98,15 +98,29 @@ export default function TaskPage() {
     }
   };
 
+  const handleTaskFormSuccess = () => {
+    setShowTaskForm(false);
+    refetch();
+  };
+
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <div>Error loading tasks. Please try again later.</div>;
 
   return (
     <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-8">
-          Task Management
-        </h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
+            Task Management
+          </h1>
+          <button
+            onClick={() => setShowTaskForm(!showTaskForm)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <AddTaskIcon className="w-5 h-5" />
+            {showTaskForm ? "Close Form" : "New Task"}
+          </button>
+        </div>
 
         {errorMessage && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -114,7 +128,15 @@ export default function TaskPage() {
           </div>
         )}
 
-        <TaskForm onCreate={createTask} onSuccess={refetch} />
+        {showTaskForm && (
+          <div className="mb-8 animate-slideDown">
+            <TaskForm 
+              onCreate={createTask} 
+              onSuccess={handleTaskFormSuccess}
+              onCancel={() => setShowTaskForm(false)}
+            />
+          </div>
+        )}
 
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-8">
