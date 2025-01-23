@@ -7,12 +7,16 @@ import {
   useGetTasksQuery,
   useUpdateTaskStatusMutation,
   useDeleteTaskMutation,
+  useUpdateTaskMutation,
 } from "@/lib/services/tasks";
 import TaskForm from "@/components/TaskForm";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import AddTaskIcon from '@mui/icons-material/AddTask';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
+// ... (columns object remains the same)
 const columns = {
   pending: {
     title: "Pending",
@@ -32,6 +36,9 @@ const columns = {
 };
 
 export default function TaskPage() {
+  // ... (existing state and hooks)
+  const [editingTask, setEditingTask] = useState(null);
+  const [updateTask] = useUpdateTaskMutation();
   const { data: response, isLoading, isError, refetch } = useGetTasksQuery();
   const [localTasks, setLocalTasks] = useState([]);
   const [createTask] = useCreateTaskMutation();
@@ -100,15 +107,23 @@ export default function TaskPage() {
 
   const handleTaskFormSuccess = () => {
     setShowTaskForm(false);
+    setEditingTask(null);
     refetch();
   };
 
+  const handleEditTask = (task) => {
+    setEditingTask(task);
+    setShowTaskForm(true);
+  };
+
+  // ... (rest of existing code)
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <div>Error loading tasks. Please try again later.</div>;
 
   return (
     <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
+        {/* Header remains same */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
             Task Management
@@ -132,12 +147,18 @@ export default function TaskPage() {
           <div className="mb-8 animate-slideDown">
             <TaskForm 
               onCreate={createTask} 
+              onUpdate={updateTask}
               onSuccess={handleTaskFormSuccess}
-              onCancel={() => setShowTaskForm(false)}
+              onCancel={() => {
+                setShowTaskForm(false);
+                setEditingTask(null);
+              }}
+              initialData={editingTask}
             />
           </div>
         )}
 
+        {/* Task columns */}
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-8">
             {Object.entries(columns).map(([columnId, { title, color, border }]) => (
@@ -152,6 +173,7 @@ export default function TaskPage() {
                         : ""
                     }`}
                   >
+                    {/* Column header */}
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                       {title}{" "}
                       <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -177,35 +199,46 @@ export default function TaskPage() {
                                   : provided.draggableProps.style.transform,
                               }}
                             >
-                              <div
-                                className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ${
-                                  snapshot.isDragging
-                                    ? "shadow-xl dark:shadow-gray-900/50 border-2 border-dashed border-gray-300"
-                                    : "border border-transparent"
-                                }`}
-                              >
-                                <div className="flex justify-between items-center">
-                                  <div className="flex-1">
-                                    <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                                      {task.title}
-                                    </h3>
-                                    {task.description && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 break-words">
-                                        {task.description}
-                                      </p>
-                                    )}
+                              {/* Task card */}
+                              <div className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ${
+                                snapshot.isDragging
+                                  ? "shadow-xl dark:shadow-gray-900/50 border-2 border-dashed border-gray-300"
+                                  : "border border-transparent"
+                              }`}>
+                                <div className="flex justify-between items-start gap-2">
+                                    <div className="flex-1 min-w-0"> {/* Add min-w-0 to prevent overflow */}
+                                      <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate line-clamp-1">
+                                        {task.title}
+                                      </h3>
+                                      {task.description && (
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 break-words overflow-hidden">
+                                          {task.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-1 flex-shrink-0"> {/* Prevent button shrink */}
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleEditTask(task);
+                                        }}
+                                        className="text-blue-500 hover:text-blue-700 transition-colors p-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                                        aria-label="Edit task"
+                                      >
+                                        <EditIcon className="w-5 h-5" />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setShowDeleteModal(task._id);
+                                        }}
+                                        className="text-red-500 hover:text-red-700 transition-colors p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30"
+                                        aria-label="Delete task"
+                                      >
+                                        <DeleteIcon className="w-5 h-5" />
+                                      </button>
+                                    </div>
                                   </div>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setShowDeleteModal(task._id);
-                                    }}
-                                    className="text-red-500 hover:text-red-700 transition-colors"
-                                    aria-label="Delete task"
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
                               </div>
                             </div>
                           )}
