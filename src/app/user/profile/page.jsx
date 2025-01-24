@@ -48,10 +48,10 @@ const Profile = () => {
             ) : (
               <div className="flex items-center gap-2">
                 <span className={`h-3 w-3 rounded-full ${
-                  user.is_verified ? 'bg-green-500' : 'bg-yellow-500'
+                  user.isVerified ? 'bg-green-500' : 'bg-yellow-500'
                 }`}></span>
                 <p className="text-lg">
-                  {user.is_verified ? 'Verified' : 'Pending Verification'}
+                  {user.isVerified ? 'Verified' : 'Pending Verification'}
                 </p>
               </div>
             )}
