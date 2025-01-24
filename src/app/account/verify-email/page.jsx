@@ -5,9 +5,11 @@ import { verifyEmailSchema } from "@/validation/schemas";
 import { useVerifyEmailMutation, useResendOtpMutation } from "@/lib/services/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTheme } from '@/context/ThemeContext';
 
 const VerifyEmailPage = () => {
   const router = useRouter();
+  const { isDarkMode } = useTheme();
   const [cooldown, setCooldown] = useState(0);
   const [verifyEmail, { isLoading: isVerifying }] = useVerifyEmailMutation();
   const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
@@ -23,7 +25,7 @@ const VerifyEmailPage = () => {
     validationSchema: verifyEmailSchema,
     onSubmit: async values => {
       try {
-        const { data } = await verifyEmail(values);
+        const { data } = await verifyEmail(values).unwrap();
         setMessage({ type: "success", content: data.message });
         setTimeout(() => router.push("/account/login"), 2000);
       } catch (error) {
@@ -54,26 +56,52 @@ const VerifyEmailPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="w-full max-w-md mx-4 p-8 bg-white rounded-2xl shadow-xl">
-        <div className="text-center space-y-2 mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Verify Email</h2>
-          <p className="text-gray-600">Enter the OTP sent to your email</p>
+    <div className={`min-h-screen flex items-center justify-center transition-colors duration-300 ${
+      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    }`}>
+      <div className={`w-full max-w-md mx-4 p-8 rounded-xl shadow-xl transition-all duration-300 ${
+        isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+      }`}>
+        <div className="text-center space-y-3 mb-8">
+          <h2 className={`text-3xl font-bold tracking-tight ${
+            isDarkMode ? 'text-gray-100' : 'text-gray-900'
+          }`}>
+            Verify Email
+          </h2>
+          <p className={`text-sm ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>
+            Enter the OTP sent to your email
+          </p>
         </div>
 
         {message.content && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.type === "success" 
-              ? "bg-green-100 text-green-800" 
-              : "bg-red-100 text-red-800"
+          <div className={`mb-6 p-3 rounded-lg flex items-center gap-3 ${
+            message.type === 'success' 
+              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800' 
+              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800'
           }`}>
-            {message.content}
+            <svg 
+              className="w-5 h-5 flex-shrink-0" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              {message.type === 'success' ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              )}
+            </svg>
+            <span className="text-sm">{message.content}</span>
           </div>
         )}
 
         <form onSubmit={formik.handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-2">
+            <label className={`block text-sm font-medium ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               Email Address
             </label>
             <input
@@ -82,23 +110,34 @@ const VerifyEmailPage = () => {
               value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`w-full px-4 py-3 border ${
+              className={`w-full px-4 py-3 rounded-lg border focus:ring-2 transition-all ${
                 formik.touched.email && formik.errors.email 
-                  ? "border-red-500" 
-                  : "border-gray-300"
-              } rounded-lg focus:ring-2 ${
-                formik.touched.email && formik.errors.email 
-                  ? "focus:ring-red-500" 
-                  : "focus:ring-blue-500"
-              } transition-all`}
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : `${
+                      isDarkMode 
+                        ? 'border-gray-600 focus:border-blue-500 focus:ring-blue-500' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    }`
+              } ${
+                isDarkMode 
+                  ? 'bg-gray-700 text-gray-100 placeholder-gray-400' 
+                  : 'bg-white text-gray-900 placeholder-gray-500'
+              }`}
             />
             {formik.touched.email && formik.errors.email && (
-              <p className="mt-2 text-sm text-red-600">{formik.errors.email}</p>
+              <p className="mt-1 text-sm text-red-500 flex items-center gap-1.5">
+                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>{formik.errors.email}</span>
+              </p>
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-2">
+            <label className={`block text-sm font-medium ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               Verification Code
             </label>
             <input
@@ -109,18 +148,27 @@ const VerifyEmailPage = () => {
               value={formik.values.otp}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`w-full px-4 py-3 border ${
+              className={`w-full px-4 py-3 rounded-lg border focus:ring-2 transition-all ${
                 formik.touched.otp && formik.errors.otp 
-                  ? "border-red-500" 
-                  : "border-gray-300"
-              } rounded-lg focus:ring-2 ${
-                formik.touched.otp && formik.errors.otp 
-                  ? "focus:ring-red-500" 
-                  : "focus:ring-blue-500"
-              } transition-all`}
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : `${
+                      isDarkMode 
+                        ? 'border-gray-600 focus:border-blue-500 focus:ring-blue-500' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    }`
+              } ${
+                isDarkMode 
+                  ? 'bg-gray-700 text-gray-100 placeholder-gray-400' 
+                  : 'bg-white text-gray-900 placeholder-gray-500'
+              }`}
             />
             {formik.touched.otp && formik.errors.otp && (
-              <p className="mt-2 text-sm text-red-600">{formik.errors.otp}</p>
+              <p className="mt-1 text-sm text-red-500 flex items-center gap-1.5">
+                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>{formik.errors.otp}</span>
+              </p>
             )}
           </div>
 
@@ -128,11 +176,16 @@ const VerifyEmailPage = () => {
             <button
               type="submit"
               disabled={isVerifying}
-              className={`w-full py-3 px-6 text-white font-medium rounded-lg transition-all ${
+              className={`w-full py-3 px-6 font-medium rounded-lg transition-colors 
+                focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 isVerifying 
-                  ? "bg-blue-400 cursor-not-allowed" 
-                  : "bg-blue-600 hover:bg-blue-700"
-              } focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                  ? 'bg-blue-400 cursor-not-allowed' 
+                  : `${
+                      isDarkMode 
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500 focus:ring-offset-gray-800' 
+                        : 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500 focus:ring-offset-white'
+                    }`
+              }`}
             >
               {isVerifying ? "Verifying..." : "Verify Email"}
             </button>
@@ -141,18 +194,30 @@ const VerifyEmailPage = () => {
               type="button"
               onClick={handleResendOTP}
               disabled={cooldown > 0 || isResending}
-              className={`w-full py-3 px-6 text-white font-medium rounded-lg transition-all ${
+              className={`w-full py-3 px-6 font-medium rounded-lg transition-colors 
+                focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 cooldown > 0 || isResending 
-                  ? "bg-gray-400 cursor-not-allowed" 
-                  : "bg-gray-600 hover:bg-gray-700"
-              } focus:ring-2 focus:ring-gray-500 focus:ring-offset-2`}
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : `${
+                      isDarkMode 
+                        ? 'bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500 focus:ring-offset-gray-800' 
+                        : 'bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500 focus:ring-offset-white'
+                    }`
+              }`}
             >
               {isResending ? "Sending..." : cooldown > 0 ? `Resend OTP (${cooldown}s)` : "Resend OTP"}
             </button>
           </div>
 
           <div className="text-center text-sm">
-            <Link href="/account/login" className="text-blue-600 hover:text-blue-700">
+            <Link 
+              href="/account/login" 
+              className={`font-medium ${
+                isDarkMode 
+                  ? 'text-blue-400 hover:text-blue-300' 
+                  : 'text-blue-600 hover:text-blue-700'
+              } transition-colors`}
+            >
               Back to Login
             </Link>
           </div>

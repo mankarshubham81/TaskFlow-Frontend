@@ -2,5 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+.dark {
+    color-scheme: dark;
+  }
+  
+  [data-theme="dark"] {
+    --color-primary: #6366f1;
+    /* Add other dark mode variables */
+  }
+  
+  [data-theme="light"] {
+    --color-primary: #3f51b5;
+    /* Add other light mode variables */
+  }
 
     

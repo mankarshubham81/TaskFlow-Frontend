@@ -3,7 +3,6 @@ import { useGetUserQuery } from "@/lib/services/auth";
 import { useTheme } from '@/context/ThemeContext';
 import { motion } from 'framer-motion';
 import { Skeleton } from "@mui/material";
-import { useTheme } from '@/context/ThemeContext';
 const Profile = () => {
   const { isDarkMode } = useTheme();
   const { data, isLoading } = useGetUserQuery();
