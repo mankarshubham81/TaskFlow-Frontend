@@ -1,9 +1,9 @@
-import UsersNavebar from "@/components/UsersNavebar"
+import Navbar from "@/components/Navbar"
 const UserLayout = ({ children }) => {
   return (
     <div>
       <div>
-        <UsersNavebar />
+        <Navbar />
       </div>
 
       <div>

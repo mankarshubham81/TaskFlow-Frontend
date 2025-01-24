@@ -21,11 +21,21 @@ const Register = () => {
     validationSchema: registerSchema,
     onSubmit: async values => {
       try {
-        const { data } = await createUser(values).unwrap();
+        const { data } = await createUser(values);
         setMessage({ type: 'success', content: data.message });
         router.push('/account/verify-email');
       } catch (error) {
-        setMessage({ type: 'error', content: error.data?.message || "Registration failed" });
+        let errorMessage = "Registration failed";
+        
+        if (error.status === 400) {
+          errorMessage = error.data?.message || "Validation error";
+        } else if (error.status === 409) {
+          errorMessage = "Email already registered";
+        } else if (error.status === 500) {
+          errorMessage = "Server error. Please try again later.";
+        }
+    
+        setMessage({ type: 'error', content: errorMessage });
       }
     }
   });

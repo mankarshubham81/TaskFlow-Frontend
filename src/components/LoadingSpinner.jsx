@@ -19,7 +19,7 @@ const LoadingSpinner = ({ size = 'md', color = 'text-blue-600', className = '' }
     <div 
       role="status"
       aria-label="Loading"
-      className={`inline-flex items-center justify-center ${className}`}
+      className={`fixed top-0 left-0 w-full h-full flex justify-center items-center ${className}`}
     >
       <svg
         className={`animate-spin ${color} ${typeof size !== 'number' ? spinnerSize : ''}`}
