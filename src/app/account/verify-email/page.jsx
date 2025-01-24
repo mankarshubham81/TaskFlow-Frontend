@@ -23,7 +23,7 @@ const VerifyEmailPage = () => {
     validationSchema: verifyEmailSchema,
     onSubmit: async values => {
       try {
-        const { data } = await verifyEmail(values).unwrap();
+        const { data } = await verifyEmail(values);
         setMessage({ type: "success", content: data.message });
         setTimeout(() => router.push("/account/login"), 2000);
       } catch (error) {
