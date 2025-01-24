@@ -15,6 +15,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useTheme } from '@/context/ThemeContext';
 
 // ... (columns object remains the same)
 const columns = {
@@ -47,6 +48,8 @@ export default function TaskPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const { isDarkMode } = useTheme();
+
 
   useEffect(() => {
     if (response?.data) {
@@ -121,11 +124,11 @@ export default function TaskPage() {
   if (isError) return <div>Error loading tasks. Please try again later.</div>;
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div className={`min-h-screen p-8 transition-colors duration-300 border-red-800  rounded-sm space-y-4 ${isDarkMode ? 'text-white' : 'text-gray-900'} ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-6xl mx-auto">
         {/* Header remains same */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
+          <h1 className="text-3xl font-bold">
             Task Management
           </h1>
           <button
@@ -169,14 +172,14 @@ export default function TaskPage() {
                     ref={provided.innerRef}
                     className={`p-6 rounded-lg shadow-lg ${color} ${border} border transition-all duration-300 ${
                       snapshot.isDraggingOver
-                        ? "scale-105 border-2 border-dashed border-gray-400 dark:border-gray-600"
+                        ? "scale-105 border-2 border-dashed border-gray-400"
                         : ""
                     }`}
                   >
                     {/* Column header */}
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                       {title}{" "}
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="text-sm text-gray-600 ">
                         ({getTasksByColumn(columnId).length})
                       </span>
                     </h2>

@@ -27,15 +27,22 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   transition: 'all 0.3s ease',
   boxShadow: 'none',
   borderBottom: `1px solid ${theme.palette.divider}`,
-  backdropFilter: 'blur(8px)',
+  backdropFilter: 'blur(12px)',
+  background: theme.palette.mode === 'dark' 
+    ? 'rgba(30, 30, 30, 0.85)' // A soft dark gray for dark mode
+    : 'rgba(255, 255, 255, 0.85)', // A translucent white for light mode
 }));
 
 const NavButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
   fontWeight: 500,
   transition: 'all 0.2s ease',
+  color: theme.palette.mode === 'dark' 
+    ? theme.palette.text.primary 
+    : theme.palette.grey[800],
   '&:hover': {
     transform: 'translateY(-1px)',
+    backgroundColor: theme.palette.action.hover,
   },
 }));
 
@@ -94,12 +101,7 @@ const Navbar = () => {
   if (isAuth === null) return <LoadingSpinner />;
 
   return (
-    <StyledAppBar 
-      position="sticky"
-      sx={{ 
-        bgcolor: isDarkMode ? 'background.default' : 'primary.main',
-      }}
-    >
+    <StyledAppBar position="sticky">
       <Toolbar sx={{ px: { xs: 2, md: 4 } }}>
         <Typography
           variant="h6"
@@ -110,7 +112,7 @@ const Navbar = () => {
             fontWeight: 800,
             letterSpacing: 1.2,
             textDecoration: 'none',
-            color: isDarkMode ? 'text.primary' : 'common.white',
+            color: isDarkMode ? 'text.primary' : 'grey.900',
             fontFamily: "'Inter', sans-serif",
             '&:hover': { opacity: 0.9 }
           }}
@@ -119,11 +121,11 @@ const Navbar = () => {
         </Typography>
 
         {!isMobile ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <IconButton 
               onClick={toggleTheme}
               sx={{
-                color: 'inherit',
+                color: isDarkMode ? 'text.primary' : 'grey.800',
                 '&:hover': { transform: 'rotate(180deg)' }
               }}
             >
@@ -131,7 +133,7 @@ const Navbar = () => {
                 {isDarkMode ? (
                   <Brightness7 sx={{ color: 'warning.main' }} />
                 ) : (
-                  <Brightness4 sx={{ color: 'common.white' }} />
+                  <Brightness4 sx={{ color: 'grey.800' }} />
                 )}
               </AnimatedThemeIcon>
             </IconButton>
@@ -143,10 +145,8 @@ const Navbar = () => {
                 href={item.href}
                 startIcon={item.icon}
                 sx={{
-                  color: 'inherit',
-                  '&:hover': {
-                    bgcolor: isDarkMode ? 'action.hover' : 'rgba(255,255,255,0.1)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  '& .MuiButton-startIcon': {
+                    color: isDarkMode ? 'text.secondary' : 'grey.600'
                   }
                 }}
               >
@@ -159,10 +159,9 @@ const Navbar = () => {
                 onClick={handleLogout}
                 startIcon={<Logout />}
                 sx={{
-                  color: 'inherit',
+                  color: 'error.main',
                   '&:hover': {
-                    bgcolor: 'error.dark',
-                    boxShadow: '0 4px 12px rgba(244,67,54,0.2)'
+                    backgroundColor: 'error.dark + 1a',
                   }
                 }}
               >
@@ -171,7 +170,11 @@ const Navbar = () => {
             )}
           </Box>
         ) : (
-          <IconButton color="inherit" onClick={handleMenuOpen}>
+          <IconButton 
+            color="inherit" 
+            onClick={handleMenuOpen}
+            sx={{ color: isDarkMode ? 'text.primary' : 'grey.800' }}
+          >
             <MenuIcon />
           </IconButton>
         )}
@@ -182,12 +185,17 @@ const Navbar = () => {
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={handleMenuClose}
-        MenuListProps={{ sx: { py: 0 } }}
+        MenuListProps={{ 
+          sx: { 
+            py: 0,
+            bgcolor: isDarkMode ? 'grey.400' : 'background.paper',
+          } 
+        }}
         PaperProps={{
           sx: {
-            bgcolor: isDarkMode ? 'background.paper' : 'background.default',
             minWidth: 200,
             border: `1px solid ${muiTheme.palette.divider}`,
+            boxShadow: muiTheme.shadows[4],
           }
         }}
       >
@@ -228,7 +236,7 @@ const Navbar = () => {
             onClick={handleLogout}
             sx={{
               py: 1.5,
-              bgcolor: 'error.light',
+              bgcolor: 'error.dark  ',
               '&:hover': { bgcolor: 'error.main', color: 'common.white' }
             }}
           >

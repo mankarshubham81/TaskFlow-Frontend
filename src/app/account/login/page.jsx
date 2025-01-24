@@ -30,7 +30,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className={`min-h-screen flex items-center justify-center border-red-800  rounded-sm space-y-4 ${isDarkMode ? 'text-white' : 'text-gray-900'} ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="w-full max-w-md mx-4 p-8 bg-white rounded-2xl shadow-xl">
         <div className="text-center space-y-2 mb-8">
           <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>

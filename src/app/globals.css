@@ -2,20 +2,5 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-    :root {
-      --color-text: 23 23 23;
-      --color-background: 249 250 251;
-      --color-primary: 59 130 246;
-      --color-surface: 255 255 255;
-    }
-  
-    .dark {
-      --color-text: 229 229 229;
-      --color-background: 17 24 39;
-      --color-primary: 37 99 235;
-      --color-surface: 31 41 55;
-    }
-  }
 
     

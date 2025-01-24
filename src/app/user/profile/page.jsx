@@ -3,16 +3,14 @@ import { useGetUserQuery } from "@/lib/services/auth";
 import { useTheme } from '@/context/ThemeContext';
 import { motion } from 'framer-motion';
 import { Skeleton } from "@mui/material";
-
+import { useTheme } from '@/context/ThemeContext';
 const Profile = () => {
   const { isDarkMode } = useTheme();
   const { data, isLoading } = useGetUserQuery();
   const user = data?.user || {};
 
   return (
-    <div className={`min-h-screen flex items-center justify-center transition-colors duration-300 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    <div className={`min-h-screen flex items-center justify-center transition-colors duration-300 border-red-800  rounded-sm space-y-4 ${isDarkMode ? 'text-white' : 'text-gray-900'} ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
