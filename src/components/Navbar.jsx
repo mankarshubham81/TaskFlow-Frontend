@@ -80,12 +80,12 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutUser().unwrap();
+      await logoutUser();
       
-      // Remove all client-side cookies with matching server settings
-      Cookies.remove('is_auth', { path: '/' });
-      Cookies.remove('accessToken', { path: '/' });
-      Cookies.remove('refreshToken', { path: '/' });
+      // Remove all client-side cookies with proper attributes
+      Cookies.remove('is_auth', { path: '/', secure: true });
+      Cookies.remove('accessToken', { path: '/', secure: true });
+      Cookies.remove('refreshToken', { path: '/', secure: true });
       
       // Force state update and redirect
       setIsAuth(false);

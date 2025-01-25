@@ -23,7 +23,7 @@ const Register = () => {
     validationSchema: registerSchema,
     onSubmit: async values => {
       try {
-        const { data } = await createUser(values).unwrap();
+        const { data } = await createUser(values);
         setMessage({ type: 'success', content: data.message });
         router.push('/account/verify-email');
       } catch (error) {

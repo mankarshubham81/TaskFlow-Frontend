@@ -18,7 +18,7 @@ const Login = () => {
     validationSchema: loginSchema,
     onSubmit: async values => {
       try {
-        const { data } = await loginUser(values).unwrap();
+        const { data } = await loginUser(values);
         setMessage({ type: 'success', content: data.message });
         router.push('/user/task');
       } catch (error) {
