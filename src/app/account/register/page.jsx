@@ -43,7 +43,7 @@ const Register = () => {
   });
 
   const handleGoogleLogin = () => {
-    window.open(`${process.env.BACKEND_HOST}/auth/google`, "_self");
+    window.open(`https://taskflow-backend-vv35.onrender.com/auth/google`, "_self");
   };
 
   return (

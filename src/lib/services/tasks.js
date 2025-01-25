@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const tasksApi = createApi({
   reducerPath: 'tasksApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: `${process.env.BACKEND_HOST}/api/tasks/`,
+    baseUrl: "https://taskflow-backend-vv35.onrender.com/api/tasks/",
     credentials: 'include'
   }),
   tagTypes: ['Tasks'],
