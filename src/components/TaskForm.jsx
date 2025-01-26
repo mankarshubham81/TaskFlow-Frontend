@@ -32,9 +32,9 @@ export default function TaskForm({
         await onUpdate({ 
           taskId: initialData._id,
           ...data
-        }).unwrap();
+        });
       } else {
-        await onCreate(data).unwrap();
+        await onCreate(data);
       }
       onSuccess();
     } catch (err) {

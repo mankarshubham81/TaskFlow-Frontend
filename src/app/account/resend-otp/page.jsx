@@ -18,7 +18,7 @@ const ResendOtp = () => {
     validationSchema: resendOtpSchema,
     onSubmit: async values => {
       try {
-        const { data } = await resendOtp(values).unwrap();
+        const { data } = await resendOtp(values);
         setMessage({ type: 'success', content: data.message });
         setTimeout(() => router.push("/account/verify-email"), 2000);
       } catch (error) {

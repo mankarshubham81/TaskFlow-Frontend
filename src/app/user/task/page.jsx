@@ -84,7 +84,7 @@ export default function TaskPage() {
     setLocalTasks(updatedTasks);
 
     try {
-      await updateStatus({ taskId, status: newStatus }).unwrap();
+      await updateStatus({ taskId, status: newStatus });
       await refetch();
       setErrorMessage("");
     } catch (error) {
@@ -98,7 +98,7 @@ export default function TaskPage() {
     if (!showDeleteModal) return;
 
     try {
-      await deleteTask(showDeleteModal).unwrap();
+      await deleteTask(showDeleteModal);
       await refetch();
     } catch (error) {
       console.error("Failed to delete task:", error);

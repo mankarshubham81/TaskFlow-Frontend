@@ -25,7 +25,7 @@ const VerifyEmailPage = () => {
     validationSchema: verifyEmailSchema,
     onSubmit: async values => {
       try {
-        const { data } = await verifyEmail(values).unwrap();
+        const { data } = await verifyEmail(values);
         setMessage({ type: "success", content: data.message });
         setTimeout(() => router.push("/account/login"), 2000);
       } catch (error) {
@@ -44,7 +44,7 @@ const VerifyEmailPage = () => {
     }
 
     try {
-      await resendOtp({ email: formik.values.email }).unwrap();
+      await resendOtp({ email: formik.values.email });
       setCooldown(30);
       setMessage({ type: "success", content: "New OTP sent successfully" });
     } catch (error) {

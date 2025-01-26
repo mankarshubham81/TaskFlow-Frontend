@@ -18,7 +18,7 @@ const ResetPasswordConfirm = () => {
     validationSchema: resetPasswordSchema,
     onSubmit: async values => {
       try {
-        const { data } = await resetPassword({ ...values, id, token }).unwrap();
+        const { data } = await resetPassword({ ...values, id, token });
         setMessage({ type: 'success', content: data.message });
         setTimeout(() => router.push('/account/login'), 2000);
       } catch (error) {

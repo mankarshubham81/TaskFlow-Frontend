@@ -16,7 +16,7 @@ const ResetPasswordLink = () => {
     validationSchema: resetPasswordLinkSchema,
     onSubmit: async (values, { resetForm }) => {
       try {
-        const { data } = await resetPasswordLink(values).unwrap();
+        const { data } = await resetPasswordLink(values);
         setMessage({ type: 'success', content: data.message });
         resetForm();
       } catch (error) {
